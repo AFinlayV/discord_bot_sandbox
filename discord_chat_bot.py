@@ -7,6 +7,14 @@ when the bot is restarted. I want to make a bot that can remember things for a l
 that were said in the past. I also want to make a bot that can learn from the conversation and improve itself over time.
 Then I guess I want to run this on a cloud service so I don't have to keep it running on my laptop.
 I don't fully understand how async works. do some research on that after some sleep
+
+TODO:
+    [ ] pass username to the bot so it can remember who said what
+    [ ] make the bot remember things for a long time
+    [ ] make a way to save memories with embeddings so that semantic search can be done to retrieve past memories
+    [ ] save the memories separated by discord user name
+    [ ] make it able to communicate with other bots (MidJourney)
+    [ ] deploy in a way that it can run all the time. (maybe use heroku)
 """
 
 import discord
