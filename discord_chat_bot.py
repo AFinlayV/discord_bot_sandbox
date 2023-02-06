@@ -1,11 +1,12 @@
 """
 This will be a simple gpt based chatbot with discord integrations
 The idea here is to allow a chatbot to participate in a discord and remember what each participant has said.
-
-based on a conversation with chatgpt here is the code it gave me the following code.
-
-I can use that to create a simple chatbot that can be used in discord. I'll need to figure out the memory thing later.
 I kinda stole the idea from TheGuy on Twitter (@Guygies). he has a bot called Geepers on discord.
+The bot has a medium term memory and can respond to things that were said in the past, but the memory is cleared
+when the bot is restarted. I want to make a bot that can remember things for a long time and can respond to things
+that were said in the past. I also want to make a bot that can learn from the conversation and improve itself over time.
+Then I guess I want to run this on a cloud service so I don't have to keep it running on my laptop.
+I don't fully understand how async works. do some research on that after some sleep
 """
 
 import discord
@@ -15,8 +16,6 @@ from langchain.llms import OpenAI
 import os
 from langchain import PromptTemplate, ConversationChain, LLMChain
 from langchain.chains.conversation.memory import ConversationalBufferWindowMemory, ConversationSummaryBufferMemory
-from langchain.agents import load_tools
-from langchain.agents import initialize_agent
 
 
 def load_json(filepath):
@@ -39,6 +38,7 @@ with open("/Users/alexthe5th/Documents/API Keys/GoogleSearch_ID.txt", "r") as f:
 
 with open("prompt_template.txt", "r") as f:
     template = f.read()
+
 auth = load_json('/Users/alexthe5th/Documents/API Keys/Discord_auth.json')
 TOKEN = auth['token'].strip()
 CHAN_ID = int(auth['chan_id'].strip())
@@ -47,7 +47,7 @@ client = discord.Client(intents=intents)
 llm = OpenAI(temperature=0.9,
              model_name='text-davinci-003',
              max_tokens=1024,
-)
+             )
 memory = ConversationalBufferWindowMemory()
 prompt = PromptTemplate(
     input_variables=["history", "human_input"],
