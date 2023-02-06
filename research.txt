@@ -1,0 +1,127 @@
+Text Chat:
+import discord
+
+client = discord.Client()
+
+@client.event
+async def on_message(message):
+    if message.channel.id == CHANNEL_ID:
+        if message.content == "!hello":
+            await message.channel.send("Hello! How are you?")
+
+client.run("DISCORD_BOT_TOKEN")
+
+Audio:
+import discord
+
+client = discord.Client()
+
+@client.event
+async def on_ready():
+    print("Bot is ready!")
+
+@client.event
+async def on_message(message):
+    if message.content == "!play":
+        channel = message.author.voice.channel
+        if channel:
+            vc = await channel.connect()
+            vc.play(discord.FFmpegPCMAudio("audio_file.mp3"))
+        else:
+            print("User is not in a voice channel.")
+
+client.run("DISCORD_BOT_TOKEN")
+
+Streaming Audio:
+import discord
+import pyaudio
+
+client = discord.Client()
+
+@client.event
+async def on_ready():
+    print("Bot is ready!")
+
+@client.event
+async def on_message(message):
+    if message.content == "!stream":
+        channel = message.author.voice.channel
+        if channel:
+            vc = await channel.connect()
+            p = pyaudio.PyAudio()
+            stream = p.open(format=pyaudio.paInt16,
+                            channels=1,
+                            rate=48000,
+                            input=True,
+                            frames_per_buffer=2048)
+            while True:
+                data = stream.read(2048)
+                vc.send_audio_packet(data)
+        else:
+            print("User is not in a voice channel.")
+
+client.run("DISCORD_BOT_TOKEN")
+
+import discord
+
+async def hello_discord(client, channel_id):
+    channel = client.get_channel(channel_id)
+    await channel.send("Hello World")
+
+if __name__ == "__main__":
+    # Replace the value of `token` with your bot's token
+    token = "YOUR_BOT_TOKEN_HERE"
+
+    # Replace the value of `channel_id` with the ID of the text channel
+    channel_id = 123456789012345678
+
+    client = discord.Client()
+
+    client.run(token)
+    asyncio.run(hello_discord(client, channel_id))
+
+
+Code from realpython.com:
+
+import os
+import json
+import discord
+
+
+
+def load_json(filepath):
+    with open(filepath, 'r', encoding='utf-8') as infile:
+        return json.load(infile)
+
+auth = load_json('/Users/alexthe5th/Documents/API Keys/Discord_auth.json')
+TOKEN = auth['token'].strip()
+CHAN_ID = auth['chan_id'].strip()
+
+
+def init_discord():
+    intents = discord.Intents.default()
+    client = discord.Client(verify=False, intents=intents)
+    client.run(TOKEN)
+    return client
+
+async def hello_discord(client):
+    print(f'{client.user} has connected to Discord!')
+    channel = client.get_channel(CHAN_ID)
+    await channel.send('Hello World!')
+
+
+def main():
+    client = init_discord()
+    text = 'Hello World!'
+    print(text)
+    # @client.event()
+    # print text in the server channel
+    channel = client.get_channel(CHAN_ID)
+    await channel.send(text)
+    client.run(TOKEN)
+
+
+
+if __name__ == "__main__":
+    main()
+"""
