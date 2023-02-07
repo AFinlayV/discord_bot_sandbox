@@ -23,9 +23,12 @@ import openai
 from langchain.llms import OpenAI
 import os
 from langchain import PromptTemplate, ConversationChain, LLMChain
-from langchain.chains.conversation.memory import ConversationalBufferWindowMemory, ConversationSummaryBufferMemory
+from langchain.chains.conversation.memory import ConversationalBufferWindowMemory, \
+    ConversationSummaryBufferMemory, ConversationEntityMemory
+from langchain.chains.conversation.prompt import ENTITY_MEMORY_CONVERSATION_TEMPLATE
 
 
+# Load Keys
 def load_json(filepath):
     with open(filepath, 'r', encoding='utf-8') as infile:
         return json.load(infile)
@@ -35,46 +38,47 @@ with open("/Users/alexthe5th/Documents/API Keys/OpenAI_API_key.txt", "r") as f:
     key = f.read().strip()
     openai.api_key = key
     os.environ["OPENAI_API_KEY"] = key
-
 with open("/Users/alexthe5th/Documents/API Keys/GoogleSearchAPI_key.txt", "r") as f:
     key = f.read().strip()
     os.environ["GOOGLE_API_KEY"] = key
-
 with open("/Users/alexthe5th/Documents/API Keys/GoogleSearch_ID.txt", "r") as f:
     key = f.read().strip()
     os.environ["GOOGLE_CSE_ID"] = key
-
 with open("prompt_template.txt", "r") as f:
     template = f.read()
-
 auth = load_json('/Users/alexthe5th/Documents/API Keys/Discord_auth.json')
 TOKEN = auth['token'].strip()
 CHAN_ID = int(auth['chan_id'].strip())
+
+# Set up discord bot
 intents = discord.Intents.all()
 client = discord.Client(intents=intents)
-llm = OpenAI(temperature=0.9,
-             model_name='text-davinci-003',
-             max_tokens=1024,
-             )
-memory = ConversationalBufferWindowMemory()
+llm = OpenAI(
+    temperature=0,
+    model_name='text-davinci-003',
+    max_tokens=1024,
+)
+memory = ConversationEntityMemory(llm=llm)
 prompt = PromptTemplate(
-    input_variables=["history", "human_input"],
+    input_variables=['entities', 'history', 'input'],
     template=template
 )
-
-bort = LLMChain(
+bort = ConversationChain(
     llm=llm,
-    prompt=prompt,
     verbose=True,
-    memory=ConversationSummaryBufferMemory(llm=llm, max_token_limit=2048),
+    prompt=ENTITY_MEMORY_CONVERSATION_TEMPLATE,
+    memory=ConversationEntityMemory(llm=llm, memory=memory)
 )
 
 
+# Discord interface
 @client.event
 async def on_message(message):
     if not message.author.bot:
         discord_text = message.content
-        reply = bort.predict(human_input=discord_text, history=bort.memory)
+        user = message.author.name
+        text = f"{user}: {discord_text}"
+        reply = bort.run(input=text)
         await message.channel.send(reply)
 
 
@@ -82,7 +86,6 @@ async def on_message(message):
 async def on_ready():
     channel = client.get_channel(CHAN_ID)
     if channel is not None:
-        await channel.send("Hello World!")
         await channel.send(f"{client.user} has connected to Discord!")
     else:
         print("Channel not found")
