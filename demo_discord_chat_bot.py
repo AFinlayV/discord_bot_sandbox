@@ -20,8 +20,10 @@ TODO:
 import discord
 import json
 import openai
-from langchain.llms import OpenAI
 import os
+import datetime
+from time import time
+from langchain.llms import OpenAI
 from langchain import PromptTemplate, ConversationChain, LLMChain
 from langchain.chains.conversation.memory import ConversationalBufferWindowMemory, \
     ConversationSummaryBufferMemory, ConversationEntityMemory
@@ -29,9 +31,31 @@ from langchain.chains.conversation.prompt import ENTITY_MEMORY_CONVERSATION_TEMP
 
 
 # Load Keys
+
+def open_file(filepath):
+    with open(filepath, 'r', encoding='utf-8') as infile:
+        return infile.read()
+
+
+def save_file(filepath, content):
+    with open(filepath, 'w', encoding='utf-8') as outfile:
+        outfile.write(content)
+
+
 def load_json(filepath):
     with open(filepath, 'r', encoding='utf-8') as infile:
         return json.load(infile)
+
+
+def save_json(filepath, payload):
+    with open(filepath, 'w', encoding='utf-8') as outfile:
+        json.dump(payload, outfile, ensure_ascii=False, sort_keys=True, indent=2)
+
+
+def timestamp_to_datetime(unix_time):
+    return datetime.datetime.fromtimestamp(unix_time).strftime("%A, %B %d, %Y at %I:%M%p %Z")
+
+
 
 
 with open("/Users/alexthe5th/Documents/API Keys/OpenAI_API_key.txt", "r") as f:
@@ -59,6 +83,7 @@ llm = OpenAI(
     max_tokens=1024,
 )
 memory = ConversationEntityMemory(llm=llm)
+memory.buffer = open_file('chat_history.txt')
 prompt = PromptTemplate(
     input_variables=['entities', 'history', 'input'],
     template=template
@@ -67,7 +92,7 @@ bort = ConversationChain(
     llm=llm,
     verbose=True,
     prompt=ENTITY_MEMORY_CONVERSATION_TEMPLATE,
-    memory=ConversationEntityMemory(llm=llm, memory=memory)
+    memory=memory,
 )
 
 
@@ -78,7 +103,7 @@ async def on_message(message):
         discord_text = message.content
         user = message.author.name
         text = f"{user}: {discord_text}"
-        reply = bort.run(input=text)
+        reply = bort.predict(input=text)
         await message.channel.send(reply)
 
 
@@ -89,6 +114,7 @@ async def on_ready():
         await channel.send(f"{client.user} has connected to Discord!")
     else:
         print("Channel not found")
+
 
 
 if __name__ == "__main__":
