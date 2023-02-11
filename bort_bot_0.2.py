@@ -198,8 +198,8 @@ def gpt3_completion(prompt, engine='text-davinci-003', temp=0.5, top_p=1.0, toke
                 frequency_penalty=freq_pen,
                 presence_penalty=pres_pen)
             text = response['choices'][0]['text'].strip()
-            text = re.sub('[\r\n]+', '\n', text)
-            text = re.sub('[\t ]+', ' ', text)
+            # text = re.sub('[\r\n]+', '\n', text)
+            # text = re.sub('[\t ]+', ' ', text)
             filename = '%s_gpt3.txt' % time()
             if not os.path.exists('gpt3_logs'):
                 os.makedirs('gpt3_logs')
@@ -292,7 +292,7 @@ if __name__ == "__main__":
     async def on_message(message):
         if message.author == bort.user:
             return
-        elif message.content.startswith('!'):
+        elif message.content.startswith('!') or message.content == "":
             return
         else:
             # use asyncio to run the process_message function in the background
