@@ -10,10 +10,6 @@ import json
 from langchain.llms import OpenAI
 
 
-OPENAI_KEY_FILENAME = "/Users/alexthe5th/Documents/API Keys/OpenAI_API_key.txt"
-DISCORD_AUTH_FILENAME = "/Users/alexthe5th/Documents/API Keys/Discord_auth.json"
-
-
 def init_discord_client():
     intents = discord.Intents.all()
     bot = discord.Client(intents=intents,
