@@ -5,8 +5,6 @@ import asyncio
 import discord
 from discord.ext import commands
 import os
-import openai
-import json
 from langchain.llms import OpenAI
 from langchain import PromptTemplate
 from langchain.agents import load_tools, initialize_agent
@@ -17,11 +15,6 @@ the following is a message from a user on discord:
 {message}
 the following is a response from a bot:
 """
-# These are temporary until i can rename them in the .zprofile file
-os.environ['GOOGLE_API_KEY'] = os.environ.get('GOOGLE_SEARCH_API_KEY')
-os.environ['GOOGLE_CSE_ID'] = os.environ.get('GOOGLE_SEARCH_ID')
-os.environ['WOLFRAM_ALPHA_APPID'] = os.environ.get('WOLFRAM_ALPHA_ID')
-
 
 intents = discord.Intents.all()
 CHAN = int(os.environ.get('SANDBOX_DISCORD_CHAN_ID'))
@@ -29,6 +22,7 @@ TOKEN = os.environ.get('SANDBOX_DISCORD_TOKEN')
 bot = commands.Bot(
     intents=intents,
     command_prefix='!',
+    channel_id=CHAN,
 )
 LLM = OpenAI(temperature=0.0)
 MEMORY = ConversationBufferMemory(memory_key="chat_history")
@@ -56,13 +50,11 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
-    if message.author == bot.user:
-        return
-    elif message.content.startswith('!') or message.content == "":
+    if message.channel.id != CHAN or message.author == bot.user or message.content.startswith('!') or message.content == "":
         return
     else:
         # use asyncio to run the process_message function in the background
-        response = await asyncio.get_event_loop().run_in_executor(None, process_message, message)
+        response = await asyncio.get_event_loop().run_in_executor(None, process_message, message.content)
         channel = bot.get_channel(int(os.environ.get('SANDBOX_DISCORD_CHAN_ID')))
         await channel.send(response)
 
