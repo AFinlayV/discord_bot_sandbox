@@ -10,7 +10,7 @@ import os
 intents = discord.Intents.all()
 bot = commands.Bot(
     intents=intents,
-    command_prefix='!',
+    command_prefix='/',
 )
 
 

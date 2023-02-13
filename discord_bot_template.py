@@ -4,6 +4,7 @@ A template for building discord bots that use OpenAI's GPT-3 API.
 
 import asyncio
 import discord
+from discord.ext import
 import os
 import openai
 import json
