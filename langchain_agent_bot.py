@@ -66,7 +66,6 @@ async def ask_gpt(ctx, *args):
     else:
         # use asyncio to run the process_message function in the background
         response = await asyncio.get_event_loop().run_in_executor(None, process_message, question)
-        channel = bot.get_channel(int(os.environ.get('SANDBOX_DISCORD_CHAN_ID')))
         await ctx.send(response)
 
 
